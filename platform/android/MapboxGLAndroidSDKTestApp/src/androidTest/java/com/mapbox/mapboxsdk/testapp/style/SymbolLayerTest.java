@@ -9,6 +9,8 @@ import timber.log.Timber;
 
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.types.Formatted;
+import com.mapbox.mapboxsdk.style.types.FormattedSection;
 import com.mapbox.mapboxsdk.testapp.activity.BaseActivityTest;
 
 import org.junit.Test;
@@ -114,7 +116,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getFilter().toString(), filter.toString());
     });
   }
-
 
 
   @Test
@@ -258,7 +259,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testIconTextFitAsConstant() {
     validateTestSetup();
@@ -319,7 +319,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testIconRotateAsConstant() {
     validateTestSetup();
@@ -348,7 +347,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getIconRotate().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testIconPaddingAsConstant() {
@@ -421,7 +419,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testIconPitchAlignmentAsConstant() {
     validateTestSetup();
@@ -477,8 +474,28 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals((String) layer.getTextField().getValue(), (String) "");
 
       layer.setProperties(textField("{token}"));
-      assertEquals(layer.getTextField().getExpression(),
-         Expression.format(Expression.toString(Expression.get("token"))));
+      assertEquals(layer.getTextField().getExpression(), Expression.format(Expression.toString(Expression.get("token")), null, null));
+    });
+  }
+
+  @Test
+  public void testFormattedTextFieldAsConstant() {
+    validateTestSetup();
+    setupLayer();
+    Timber.i("text-field-formatted");
+    invoke(mapboxMap, (uiController, mapboxMap) -> {
+      assertNotNull(layer);
+
+      Formatted expected = new Formatted(new FormattedSection[] {
+        new FormattedSection("", 1.0, new String[] {})
+      });
+
+      // Set and Get
+      layer.setProperties(textField(""));
+      assertEquals(layer.getFormattedTextField().getValue(), expected/*(String) ""*/);
+
+      layer.setProperties(textField("{token}"));
+      assertEquals(layer.getFormattedTextField().getExpression(), Expression.format(Expression.toString(Expression.get("token")), null, null));
     });
   }
 
@@ -491,12 +508,26 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertNotNull(layer);
 
       // Set and Get
-      Expression expression = Expression.format(string(Expression.get("undefined")));
+      Expression expression = string(Expression.get("undefined"));
       layer.setProperties(textField(expression));
-      assertEquals(layer.getTextField().getExpression(), expression);
+      assertEquals(layer.getTextField().getExpression(), Expression.format(expression, null, null));
     });
   }
 
+  @Test
+  public void testFormattedTextFieldAsExpression() {
+    validateTestSetup();
+    setupLayer();
+    Timber.i("text-field-formatted-expression");
+    invoke(mapboxMap, (uiController, mapboxMap) -> {
+      assertNotNull(layer);
+
+      // Set and Get
+      Expression expression = string(Expression.get("undefined"));
+      layer.setProperties(textField(expression));
+      assertEquals(layer.getTextField().getExpression(), Expression.format(expression, null, null));
+    });
+  }
 
   @Test
   public void testTextFontAsConstant() {
@@ -541,7 +572,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testTextMaxWidthAsConstant() {
     validateTestSetup();
@@ -570,7 +600,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getTextMaxWidth().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testTextLineHeightAsConstant() {
@@ -615,7 +644,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testTextJustifyAsConstant() {
     validateTestSetup();
@@ -645,7 +673,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testTextAnchorAsConstant() {
     validateTestSetup();
@@ -674,7 +701,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getTextAnchor().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testTextMaxAngleAsConstant() {
@@ -718,7 +744,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getTextRotate().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testTextPaddingAsConstant() {
@@ -776,7 +801,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getTextTransform().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testTextOffsetAsConstant() {
@@ -878,7 +902,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testIconColorTransition() {
     validateTestSetup();
@@ -922,7 +945,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getIconColor().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testIconColorAsIntConstant() {
@@ -982,7 +1004,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testIconHaloColorAsIntConstant() {
     validateTestSetup();
@@ -1041,7 +1062,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testIconHaloBlurTransition() {
     validateTestSetup();
@@ -1085,7 +1105,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getIconHaloBlur().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testIconTranslateTransition() {
@@ -1174,7 +1193,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testTextColorTransition() {
     validateTestSetup();
@@ -1218,7 +1236,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getTextColor().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testTextColorAsIntConstant() {
@@ -1278,7 +1295,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testTextHaloColorAsIntConstant() {
     validateTestSetup();
@@ -1337,7 +1353,6 @@ public class SymbolLayerTest extends BaseActivityTest {
     });
   }
 
-
   @Test
   public void testTextHaloBlurTransition() {
     validateTestSetup();
@@ -1381,7 +1396,6 @@ public class SymbolLayerTest extends BaseActivityTest {
       assertEquals(layer.getTextHaloBlur().getExpression(), expression);
     });
   }
-
 
   @Test
   public void testTextTranslateTransition() {

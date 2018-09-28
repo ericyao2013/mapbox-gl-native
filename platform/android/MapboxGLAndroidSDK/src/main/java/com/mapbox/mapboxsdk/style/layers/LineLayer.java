@@ -13,6 +13,8 @@ import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 import com.google.gson.JsonArray;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
+import com.mapbox.mapboxsdk.style.types.Formatted;
+import com.mapbox.mapboxsdk.style.types.FormattedSection;
 
 /**
  * A stroked line.
