@@ -3,10 +3,12 @@
 #import "MGLFoundation_Private.h"
 #import "MGLAccountManager_Private.h"
 #import "MGLGeometry_Private.h"
+#import "MGLMapboxEvents.h"
 #import "MGLNetworkConfiguration.h"
 #import "MGLOfflinePack_Private.h"
 #import "MGLOfflineRegion_Private.h"
 #import "MGLTilePyramidOfflineRegion.h"
+#import "MMEConstants.h"
 #import "NSBundle+MGLAdditions.h"
 #import "NSValue+MGLAdditions.h"
 
@@ -357,6 +359,13 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         [[strongSelf mutableArrayValueForKey:@"packs"] addObject:pack];
         if (completion) {
             completion(pack, error);
+            
+            [MGLMapboxEvents pushEvent:MMEEventTypeOfflineDownload withAttributes:@{
+                                                                                    @"shapeForOfflineRegion": NSStringFromClass(pack.region),
+                                                                                    @"minZoom": @0, // get zoom level
+                                                                                    @"maxZoom": @0, // get zoom level
+                                                                                    @"sources": @[] // ?
+                                                                                    }];
         }
     }];
 }
