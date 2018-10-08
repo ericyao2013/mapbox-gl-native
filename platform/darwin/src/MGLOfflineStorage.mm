@@ -8,6 +8,7 @@
 #import "MGLOfflinePack_Private.h"
 #import "MGLOfflineRegion_Private.h"
 #import "MGLTilePyramidOfflineRegion.h"
+#import "MGLShapeOfflineRegion.h"
 #import "MMEConstants.h"
 #import "NSBundle+MGLAdditions.h"
 #import "NSValue+MGLAdditions.h"
@@ -359,11 +360,25 @@ const MGLExceptionName MGLUnsupportedRegionTypeException = @"MGLUnsupportedRegio
         [[strongSelf mutableArrayValueForKey:@"packs"] addObject:pack];
         if (completion) {
             completion(pack, error);
+
+            MGLTilePyramidOfflineRegion *tileRegion = MGL_OBJC_DYNAMIC_CAST(pack.region, MGLTilePyramidOfflineRegion);
+            MGLShapeOfflineRegion *shapeRegion = MGL_OBJC_DYNAMIC_CAST(pack.region, MGLShapeOfflineRegion);
+            
+            NSNumber *minZoom;
+            NSNumber *maxZoom;
+            
+            if ([pack.region isKindOfClass:[MGLTilePyramidOfflineRegion class]]) {
+                minZoom = [NSNumber numberWithDouble:tileRegion.minimumZoomLevel];
+                maxZoom = [NSNumber numberWithDouble:tileRegion.maximumZoomLevel];
+            } else {
+                minZoom = [NSNumber numberWithDouble:shapeRegion.minimumZoomLevel];
+                maxZoom = [NSNumber numberWithDouble:shapeRegion.maximumZoomLevel];
+            }
             
             [MGLMapboxEvents pushEvent:MMEEventTypeOfflineDownload withAttributes:@{
-                                                                                    @"shapeForOfflineRegion": NSStringFromClass(pack.region),
-                                                                                    @"minZoom": @0, // get zoom level
-                                                                                    @"maxZoom": @0, // get zoom level
+                                                                                    @"shapeForOfflineRegion": NSStringFromClass([pack.region class]),
+                                                                                    @"minZoom": minZoom,
+                                                                                    @"maxZoom": maxZoom,
                                                                                     @"sources": @[] // ?
                                                                                     }];
         }
