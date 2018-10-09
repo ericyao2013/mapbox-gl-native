@@ -1,11 +1,13 @@
 #import "MGLOfflinePack_Private.h"
 
+#import "MGLMapboxEvents.h"
 #import "MGLOfflineStorage_Private.h"
 #import "MGLOfflineRegion_Private.h"
 #import "MGLTilePyramidOfflineRegion.h"
 #import "MGLTilePyramidOfflineRegion_Private.h"
 #import "MGLShapeOfflineRegion.h"
 #import "MGLShapeOfflineRegion_Private.h"
+#import "MMEConstants.h"
 
 #import "NSValue+MGLAdditions.h"
 
@@ -177,6 +179,30 @@ private:
     switch (status.downloadState) {
         case mbgl::OfflineRegionDownloadState::Inactive:
             self.state = status.complete() ? MGLOfflinePackStateComplete : MGLOfflinePackStateInactive;
+
+            if (self.state == MGLOfflinePackStateComplete) {
+                MGLTilePyramidOfflineRegion *tileRegion = MGL_OBJC_DYNAMIC_CAST(self.region, MGLTilePyramidOfflineRegion);
+                MGLShapeOfflineRegion *shapeRegion = MGL_OBJC_DYNAMIC_CAST(self.region, MGLShapeOfflineRegion);
+                
+                NSNumber *minZoom;
+                NSNumber *maxZoom;
+                
+                if ([self.region isKindOfClass:[MGLTilePyramidOfflineRegion class]]) {
+                    minZoom = [NSNumber numberWithDouble:tileRegion.minimumZoomLevel];
+                    maxZoom = [NSNumber numberWithDouble:tileRegion.maximumZoomLevel];
+                } else {
+                    minZoom = [NSNumber numberWithDouble:shapeRegion.minimumZoomLevel];
+                    maxZoom = [NSNumber numberWithDouble:shapeRegion.maximumZoomLevel];
+                }
+                
+                [MGLMapboxEvents pushEvent:MMEEventTypeOfflineDownload withAttributes:@{
+                                                                                        @"event": MMEEventTypeOfflineDownload,
+                                                                                        @"shapeForOfflineRegion": NSStringFromClass([self.region class]),
+                                                                                        @"minZoom": minZoom,
+                                                                                        @"maxZoom": maxZoom,
+                                                                                        @"sources": @[] // Leave empty until we can figure out how to pass in sources
+                                                                                        }];
+            }
             break;
 
         case mbgl::OfflineRegionDownloadState::Active:
