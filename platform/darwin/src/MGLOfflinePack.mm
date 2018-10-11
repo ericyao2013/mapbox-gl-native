@@ -200,7 +200,9 @@ private:
                                                                                         @"shapeForOfflineRegion": NSStringFromClass([self.region class]),
                                                                                         @"minZoom": minZoom,
                                                                                         @"maxZoom": maxZoom,
-                                                                                        @"sources": @[] // Leave empty until we can figure out how to pass in sources
+                                                                                        @"styleURL": self.region.styleURL,
+                                                                                        @"resourcesDownloaded": [NSNumber numberWithUnsignedInteger:self.progress.countOfResourcesCompleted],
+                                                                                        @"tilesDownloaded": [NSNumber numberWithUnsignedInteger:self.progress.countOfTilesCompleted]
                                                                                         }];
             }
             break;
