@@ -49,11 +49,11 @@ public:
         : kind(kind_),
           loadingMethod(loadingMethod_),
           url(std::move(url_)),
-          isLowPriority(0),
+          isLowPriority(false),
           tileData(std::move(tileData_)) {
     }
 
-    void setLowPriority() { isLowPriority = 1; }
+    void setLowPriority() { isLowPriority = true; }
 
     bool hasLoadingMethod(LoadingMethod method);
 
@@ -76,7 +76,7 @@ public:
     Kind kind;
     LoadingMethod loadingMethod;
     std::string url;
-    std::size_t isLowPriority;
+    bool isLowPriority;
 
     // Includes auxiliary data if this is a tile request.
     optional<TileData> tileData;

@@ -456,6 +456,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
         req_2.reset();
     });
 
+    sleep(3);
+
     NetworkStatus::Set(NetworkStatus::Status::Online);
 
     loop.run();

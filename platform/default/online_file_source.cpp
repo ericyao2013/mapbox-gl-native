@@ -92,7 +92,6 @@ public:
         } else {
             pendingRequests.remove(request);
         }
-        pendingRequests.assertSizes();
     }
 
     void activateOrQueueRequest(OnlineFileRequest* request) {
@@ -130,17 +129,13 @@ public:
             callback(response);
         }
 
-        pendingRequests.assertSizes();
     }
 
     void activatePendingRequest() {
-        if (pendingRequests.empty()) {
-            return;
-        }
 
-        OnlineFileRequest* request = pendingRequests.pop();
+        auto request = pendingRequests.pop();
 
-        activateRequest(request);
+        if (request) activateRequest(*request);
     }
 
     bool isPending(OnlineFileRequest* request) {
@@ -167,63 +162,46 @@ private:
         }
     }
 
-    struct PendingRequests {
-        // initialize two pending queues: a high priority queue for "regular" requests and a low priority queue for offline download requests
-        // the high priority requests are in prioritizedPendingRequests*[0]
-        // the low priority requests are in prioritizedPendingRequests*[1]
-        // context: https://github.com/mapbox/mapbox-gl-native/issues/12655
-        PendingRequests() : prioritizedPendingRequestsList(2), prioritizedPendingRequestsMap(2) {}
 
-        std::vector<std::list<OnlineFileRequest*>> prioritizedPendingRequestsList;
-        std::vector<std::unordered_map<OnlineFileRequest*, std::list<OnlineFileRequest*>::iterator>> prioritizedPendingRequestsMap;
+    struct PendingRequests {
+        PendingRequests() : queue(), num_high_priority_requests(0) {}
+
+        std::list<OnlineFileRequest*> queue;
+        int num_high_priority_requests;
 
         void remove(OnlineFileRequest* request) {
-            auto it = prioritizedPendingRequestsMap[0].find(request);
-            if (it != prioritizedPendingRequestsMap[0].end()) {
-                prioritizedPendingRequestsList[0].erase(it->second);
-                prioritizedPendingRequestsMap[0].erase(it);
+            auto it = std::find(queue.begin(), queue.end(), request);
+            if (it != queue.end()) {
+                queue.erase(it);
+                if (!request->resource.isLowPriority) num_high_priority_requests--;
             }
-            else {
-                it = prioritizedPendingRequestsMap[1].find(request);
-                if (it != prioritizedPendingRequestsMap[1].end()) {
-                    prioritizedPendingRequestsList[1].erase(it->second);
-                    prioritizedPendingRequestsMap[1].erase(it);
-                }
-            }
-            assertSizes();
         }
 
         void insert(OnlineFileRequest* request) {
-            std::size_t priority = request->resource.isLowPriority;
-            auto it = prioritizedPendingRequestsList[priority].insert(prioritizedPendingRequestsList[priority].end(), request);
-            prioritizedPendingRequestsMap[priority].emplace(request, std::move(it));
-            assertSizes();
+            if (request->resource.isLowPriority) queue.insert(queue.end(), request);
+            else {
+                assert(num_high_priority_requests <= (int) queue.size());
+                auto new_pos = queue.begin();
+                for (int i = 0; i < num_high_priority_requests; i++) new_pos++;
+                num_high_priority_requests++;
+
+                queue.insert(new_pos, request);
+            }
         }
 
-        bool empty() {
-            return prioritizedPendingRequestsList[0].empty() && prioritizedPendingRequestsList[1].empty();
-        }
 
-        OnlineFileRequest* pop() {
-            assert(!empty());
-            std::size_t next_priority = !prioritizedPendingRequestsList[0].empty() ? 0 : 1;
+        optional<OnlineFileRequest*> pop() {
+            if (queue.empty()) return optional<OnlineFileRequest*>();
 
-            OnlineFileRequest* request = prioritizedPendingRequestsList[next_priority].front();
-            prioritizedPendingRequestsList[next_priority].pop_front();
-            prioritizedPendingRequestsMap[next_priority].erase(request);
-            return request;
+            OnlineFileRequest* next = queue.front();
+            if (!queue.front()->resource.isLowPriority) num_high_priority_requests--;
+            queue.pop_front();
 
-            assertSizes();
+            return optional<OnlineFileRequest*>(next);
         }
 
         bool contains(OnlineFileRequest* request) {
-            return prioritizedPendingRequestsMap[0].find(request) != prioritizedPendingRequestsMap[0].end() ||
-                   prioritizedPendingRequestsMap[1].find(request) != prioritizedPendingRequestsMap[1].end();
-        }
-
-        void assertSizes() {
-            assert(prioritizedPendingRequestsMap[0].size() == prioritizedPendingRequestsList[0].size());
-            assert(prioritizedPendingRequestsMap[1].size() == prioritizedPendingRequestsList[1].size());
+            return std::find(queue.begin(), queue.end(), request) != queue.end();
         }
     };
 
