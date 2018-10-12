@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.maps;
 
 import android.support.annotation.NonNull;
 import com.mapbox.mapboxsdk.offline.OfflineRegionDefinition;
+import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 
 /**
  * Definition of TelemetryImpl collection
@@ -42,9 +43,17 @@ public interface TelemetryDefinition {
   boolean setSessionIdRotationInterval(int interval);
 
   /**
-   * Register an end-user offline download event.
+   * Register an end-user offline download start event.
    *
    * @param offlineDefinition the offline region definition
    */
-  void onCreateOfflineRegion(@NonNull OfflineRegionDefinition offlineDefinition);
+  void onOfflineDownloadStart(OfflineRegionDefinition offlineDefinition);
+
+  /**
+   * Register an end-user offline download complete event.
+   *
+   * @param offlineDefinition the offline region definition
+   */
+  void onOfflineDownloadCompleted(OfflineRegionDefinition offlineDefinition, OfflineRegionStatus status);
+
 }

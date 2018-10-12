@@ -419,12 +419,6 @@ public class OfflineManager {
         });
       }
     });
-
-    TelemetryDefinition telemetry = Mapbox.getTelemetry();
-    if (telemetry != null) {
-      LatLngBounds bounds = definition.getBounds();
-      telemetry.onCreateOfflineRegion(definition);
-    }
   }
 
   /**
