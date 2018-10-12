@@ -319,15 +319,8 @@ public final class MapboxMap {
    */
   @Nullable
   public <T extends Layer> T getLayerAs(@NonNull String layerId) {
-    try {
-      // noinspection unchecked
-      return (T) nativeMapView.getLayer(layerId);
-    } catch (ClassCastException exception) {
-      String message = String.format("Layer: %s is a different type: ", layerId);
-      Logger.e(TAG, message, exception);
-      MapStrictMode.strictModeViolation(message, exception);
-      return null;
-    }
+    // noinspection unchecked
+    return (T) nativeMapView.getLayer(layerId);
   }
 
   /**
